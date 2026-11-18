@@ -1,6 +1,6 @@
-# Resultados validados (Sumativa 2) para la Sumativa 3
+# Resultados validados para la etapa de modelamiento
 
-Generado desde `S2/notebooks/Sumativa2_F3_Titulados.ipynb` (semilla 42, B = R = 10.000).
+Generado desde `notebooks/02_validacion_computacional.ipynb` (semilla 42, B = R = 10.000).
 Datos: titulados de pregrado universitario 2025 (Mineduc), n = 91,667 con atraso calculable.
 Los valores numéricos completos están en `resultados_validados.csv`.
 
@@ -31,7 +31,7 @@ Los valores numéricos completos están en `resultados_validados.csv`.
 
 ## 2. Supuestos del modelo de simulación
 
-- Atraso ~ binomial negativa por sexo, ajustada por método de momentos con la media y DE de la S1:
+- Atraso ~ binomial negativa por sexo, ajustada por método de momentos con la media y DE de la etapa 1:
   hombres r = 0.6264, p = 0.1354; mujeres r = 0.6186, p = 0.1743.
 - Sexo ~ Bernoulli con P(mujer) = 0.5628.
 - Limitaciones: el modelo no genera atrasos negativos (1,4–2,0 % de los datos reales) y sobrestima
@@ -60,11 +60,11 @@ EE jackknife = 0.111, unas 3,5 veces el EE de Welch: los titulados de una misma 
 | UNIVERSIDAD SANTO TOMAS | 3805 | 1.101 | +0.033 |
 | UNIVERSIDAD DE LA SERENA | 1078 | 1.040 | -0.028 |
 
-## 4. Recomendaciones para la Sumativa 3
+## 4. Recomendaciones para el modelamiento
 
 1. **Controlar por área de conocimiento** al comparar por sexo: la brecha dentro de áreas es 0.55 semestres, la mitad de la global.
 2. **Ajustar la inferencia por agrupamiento institucional** (errores agrupados o efectos aleatorios por institución); los IC que suponen independencia son demasiado estrechos.
 3. **Reportar la mediana y la media recortada** junto a la media: la mediana es 2 en ambos sexos y la brecha está en la cola.
 4. **Modelar el atraso como conteo sobredisperso** (binomial negativa), no Poisson ni normal.
-5. **Usar los atípicos marcados en la S1 como análisis de sensibilidad**, no excluirlos por defecto: cambian la magnitud, no la dirección.
+5. **Usar los atípicos marcados en la etapa 1 como análisis de sensibilidad**, no excluirlos por defecto: cambian la magnitud, no la dirección.
 6. **Cohortes institucionales necesitan unos 700 titulados** para detectar la brecha por sexo con 80 % de potencia.

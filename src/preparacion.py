@@ -1,10 +1,10 @@
-"""Sumativa 3 · Punto 1 · Preparación de datos y manejo de faltantes.
+"""Preparación de datos y manejo de faltantes.
 
-Responsable: Fernanda Ovalle Román · MCDI501 · Grupo 6
+Autor: Jorge Álvarez Ossandón
 
-Este módulo cubre el criterio 1 de la pauta (21 pts):
+Funciones que sustentan el notebook 03_preparacion_e_imputacion.ipynb:
 
-  1. Resumen del diagnóstico de faltantes de la S1, sin recalcularlo, y
+  1. Resumen del diagnóstico de faltantes de la etapa 1, sin recalcularlo, y
      caracterización del mecanismo de pérdida.
   2. Imputación por regresión lineal múltiple, con verificación de supuestos
      (normalidad de residuos, homocedasticidad, colinealidad) y métricas de
@@ -13,9 +13,8 @@ Este módulo cubre el criterio 1 de la pauta (21 pts):
      imputación simple e imputación por regresión.
   4. Partición entrenamiento/prueba estratificada, con semilla fija.
 
-Requiere: pandas, numpy, scipy, statsmodels, scikit-learn.
-
-    pip install statsmodels scikit-learn
+Requiere: pandas, numpy, scipy, statsmodels, scikit-learn
+(instalables con pip install -r requirements.txt).
 """
 from __future__ import annotations
 
@@ -26,15 +25,15 @@ import numpy as np
 import pandas as pd
 
 # ─────────────────────────────────────────────────────────── constantes ──
-UMBRAL_ALTO = 4          # atraso alto, tal como se definió en la S1
-SEMILLA = 42             # exigida por la pauta
+UMBRAL_ALTO = 4          # atraso alto, tal como se definió en la etapa 1
+SEMILLA = 42             # semilla fija para reproducibilidad
 CODIGO_SIN_ANIO = 1900   # centinela de anio_ing_carr_ori
 CODIGO_SIN_SEM = 0       # centinela de sem_ing_carr_ori
 
 ARCHIVO_CRUDO = "20260817_Titulados_Ed_Superior_2025_WEB.csv"
 
-# Predictores de la imputación. Cuatro, dentro del rango 3–5 que pide la
-# pauta, elegidos por disponibilidad y por las correlaciones de S1/S2.
+# Predictores de la imputación. Cuatro, un número acotado que evita el sobreajuste,
+# elegidos por disponibilidad y por las correlaciones de las etapas 1 y 2.
 PREDICTORES_NUM = ["semestres_desde_act", "dur_total_carr", "edad_titulacion"]
 PREDICTORES_CAT = ["area_conocimiento"]
 
@@ -51,10 +50,9 @@ def _buscar_crudo(ruta: Optional[str]) -> Path:
 
     aqui = Path(__file__).resolve()
     candidatos = [
-        aqui.parents[2] / "data" / "raw" / ARCHIVO_CRUDO,
-        aqui.parents[3] / "data" / "raw" / ARCHIVO_CRUDO,
+        aqui.parents[1] / "data" / "raw" / ARCHIVO_CRUDO,
         Path.cwd() / "data" / "raw" / ARCHIVO_CRUDO,
-        Path.home() / "Documents" / "proyecto-grupox-mcdi500" / "data" / "raw" / ARCHIVO_CRUDO,
+        Path.cwd().parent / "data" / "raw" / ARCHIVO_CRUDO,
     ]
     for c in candidatos:
         if c.exists():
@@ -67,14 +65,14 @@ def _buscar_crudo(ruta: Optional[str]) -> Path:
 
 # ═══════════════════════════════════════════════════ 1 · carga y derivadas ──
 def cargar_base(ruta: Optional[str] = None) -> pd.DataFrame:
-    """Reproduce el preprocesamiento de la S1 y agrega las derivadas de la S3.
+    """Reproduce el preprocesamiento de la etapa 1 y agrega las derivadas de esta etapa.
 
-    Reproduce exactamente la S1: filtra a pregrado universitario, convierte los
+    Reproduce exactamente la etapa 1: filtra a pregrado universitario, convierte los
     centinelas 1900 y 0 en faltantes, y deriva `semestres_reales`,
     `edad_titulacion` y `atraso_semestres`. Debe dar 105.063 filas, de las
     cuales 91.667 tienen atraso calculable.
 
-    Agrega una derivada propia de la S3: `semestres_desde_act`, la duración
+    Agrega una derivada propia de esta etapa: `semestres_desde_act`, la duración
     calculada desde el ingreso a la carrera **actual**, que está observada en
     el 100 % de los casos y es el predictor principal de la imputación.
     """
@@ -83,7 +81,7 @@ def cargar_base(ruta: Optional[str] = None) -> pd.DataFrame:
     df = crudo[(crudo["nivel_global"] == "Pregrado") &
                (crudo["tipo_inst_1"] == "Universidades")].copy()
 
-    # Centinelas → faltantes, conservando la bandera (criterio de la S1)
+    # Centinelas → faltantes, conservando la bandera (criterio de la etapa 1)
     df["ingreso_sin_info"] = df["anio_ing_carr_ori"].eq(CODIGO_SIN_ANIO)
     df["anio_ing_carr_ori"] = df["anio_ing_carr_ori"].replace(CODIGO_SIN_ANIO, np.nan)
     df["sem_ing_carr_ori"] = df["sem_ing_carr_ori"].replace(CODIGO_SIN_SEM, np.nan)
@@ -113,9 +111,9 @@ def cargar_base(ruta: Optional[str] = None) -> pd.DataFrame:
 
 # ═════════════════════════════════════════════ 2 · diagnóstico de faltantes ──
 def diagnostico_faltantes(df: pd.DataFrame) -> Dict[str, object]:
-    """Resume el diagnóstico de la S1 y caracteriza el mecanismo de pérdida.
+    """Resume el diagnóstico de la etapa 1 y caracteriza el mecanismo de pérdida.
 
-    La pauta pide resumir sin recalcular. El resumen se acompaña de la única
+    El diagnóstico se resume sin recalcularlo, y se acompaña de la única
     comprobación que permite nombrar el mecanismo: si la ausencia depende de
     variables observadas, el mecanismo es MAR y no MCAR, y eso habilita la
     imputación condicional.
@@ -172,7 +170,7 @@ def ajustar_imputador(df: pd.DataFrame) -> Dict[str, object]:
     """Ajusta la regresión lineal múltiple sobre las observaciones completas.
 
     Devuelve el modelo, las métricas de ajuste y el resultado de los tres
-    supuestos que pide la pauta.
+    supuestos del modelo lineal.
     """
     import statsmodels.api as sm
 
@@ -295,7 +293,7 @@ def estrategia_regresion(df: pd.DataFrame, ajuste: Dict[str, object]) -> pd.Data
 
 def comparar_estrategias(conjuntos: Dict[str, pd.DataFrame],
                          referencia: str = "Eliminación") -> pd.DataFrame:
-    """Compara n, media, desviación, asimetría y las correlaciones de S1/S2."""
+    """Compara n, media, desviación, asimetría y las correlaciones de las etapas 1 y 2."""
     from scipy import stats
 
     pares = [("atraso_semestres", "edad_titulacion"),

@@ -9,11 +9,11 @@ Correlaciones,atraso_semestres – edad_titulacion,0.4660915093718542,0.46019820
 Correlaciones,semestres_reales – edad_titulacion,0.46093921507415486,0.45406961852695954,0.4678842998670308,bootstrap percentil (B = 10.000),0.0034986340108558583,bootstrap,,robusta,Fuerza moderada
 Correlaciones,dur_total_carr – edad_titulacion,-0.18899489337560285,-0.1955422349837927,-0.18266126698512586,bootstrap percentil (B = 10.000),0.0032941688471909694,bootstrap,,robusta,Fuerza débil
 Correlaciones,dur_total_carr – atraso_semestres,0.008943088666621291,0.002172503414105049,0.01563377801932541,bootstrap percentil (B = 10.000),0.0034415030917675916,bootstrap,,robusta,Fuerza despreciable
-Modelo Monte Carlo,BN hombres: r,0.6264161540150092,,,,,,,,Método de momentos con media y DE de la S1
-Modelo Monte Carlo,BN hombres: p,0.13542914478543944,,,,,,,,Método de momentos con media y DE de la S1
-Modelo Monte Carlo,BN mujeres: r,0.6186099704324869,,,,,,,,Método de momentos con media y DE de la S1
-Modelo Monte Carlo,BN mujeres: p,0.17427547690742906,,,,,,,,Método de momentos con media y DE de la S1
-Modelo Monte Carlo,P(mujer),0.562819771564467,,,,,,,,Proporción observada en la S1
+Modelo Monte Carlo,BN hombres: r,0.6264161540150092,,,,,,,,Método de momentos con media y DE de la etapa 1
+Modelo Monte Carlo,BN hombres: p,0.13542914478543944,,,,,,,,Método de momentos con media y DE de la etapa 1
+Modelo Monte Carlo,BN mujeres: r,0.6186099704324869,,,,,,,,Método de momentos con media y DE de la etapa 1
+Modelo Monte Carlo,BN mujeres: p,0.17427547690742906,,,,,,,,Método de momentos con media y DE de la etapa 1
+Modelo Monte Carlo,P(mujer),0.562819771564467,,,,,,,,Proporción observada en la etapa 1
 Potencia Welch,cohorte n = 50 (%),8.540000000000001,,,,0.2794760097038742,error Monte Carlo (R = 10.000),,requiere cautela,Bajo el supuesto binomial negativa
 Potencia Welch,cohorte n = 100 (%),16.45,,,,0.37072867436981455,error Monte Carlo (R = 10.000),,requiere cautela,Bajo el supuesto binomial negativa
 Potencia Welch,cohorte n = 200 (%),31.009999999999998,,,,0.46253431224072444,error Monte Carlo (R = 10.000),,requiere cautela,Bajo el supuesto binomial negativa
