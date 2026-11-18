@@ -82,6 +82,3 @@ pip install -r requirements.txt
 
 Con el archivo crudo en `data/raw/`, ejecutar los notebooks en orden, del 01 al 05. El notebook 03 genera los conjuntos imputados y la partición (formato parquet) que usan los notebooks 04 y 05. Todos los procedimientos aleatorios usan semilla 42.
 
-## Créditos
-
-Colaboraron en distintas etapas del proyecto Fernanda Ovalle Román, Sebastián Cajales Cid y César Lorca Bacián.
