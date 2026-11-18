@@ -1,65 +1,90 @@
-# Duración de la titulación en el pregrado universitario chileno (2025)
+# Atraso en la titulación universitaria en Chile
 
-**Curso:** MCDI501 Estadística Computacional para la Toma de Decisiones  
-**Evaluaciones:** Sumativa 1, Fase 2 (carpeta `S1/`) · Sumativa 2, Fase 3 (carpeta `S2/`)  
-**Docente:** Jean Paul Maidana González
+Análisis estadístico y modelamiento predictivo de la duración real de las carreras de pregrado universitario en Chile, a partir del registro oficial de Titulados en Educación Superior 2025 del Ministerio de Educación (N = 105.063). El proyecto recorre el ciclo completo de un análisis de datos: preparación y calidad de datos, inferencia clásica, validación computacional por remuestreo y simulación, tratamiento de datos faltantes y regresión logística, con énfasis en la reproducibilidad y en la comunicación de resultados para la toma de decisiones.
 
-## Integrantes
-- Fernanda Ovalle Román
-- Sebastián Cajales Cid
-- César Lorca Bacián
-- Jorge Álvarez Ossandón
+Desarrollado en el curso MCDI501 *Estadística Computacional para la Toma de Decisiones* del Magíster en Ciencia de Datos e Inteligencia Artificial de la Universidad Andrés Bello (2026).
 
-## Pregunta
-¿Cuánto se aparta la duración real de las carreras de su duración formal, y difiere ese atraso según sexo y jornada?
+---
 
-## Datos y Descarga Pública (Reproducibilidad)
-La investigación se fundamenta en la **Base Oficial de Titulados en Educación Superior 2025**, elaborada por el Servicio de Información de Educación Superior (SIES) del Ministerio de Educación de Chile (Mineduc).
+## Problema
 
-* **Portal oficial de descarga pública:** [Datos Abiertos Mineduc](https://datosabiertos.mineduc.cl)
-* **Conjunto de datos:** *Educación Superior - Titulados en Educación Superior 2025*
-* **Nombre exacto del archivo descargado:** `20260817_Titulados_Ed_Superior_2025_WEB.csv` (formato CSV delimitado por punto y coma, codificación `latin-1` / `utf-8`).
-* **Instrucciones de instalación:**
-  1. Descargar el archivo desde el portal oficial [datosabiertos.mineduc.cl](https://datosabiertos.mineduc.cl).
-  2. Guardar el archivo directamente en la ruta: `data/raw/20260817_Titulados_Ed_Superior_2025_WEB.csv`
-  3. Los scripts y cuadernos aplican automáticamente el filtro metodológico oficial a **Pregrado Universitario** (`nivel_global == 'Pregrado'` y `tipo_inst_1 == 'Universidades'`), obteniendo el universo de **105.063 registros** analizados en las Evaluaciones S1, S2, Formativa 2 y S3.
+¿Cuánto se aparta la duración real de las carreras universitarias de su duración formal, qué factores explican ese atraso y con qué precisión es posible anticipar un atraso alto (más de 4 semestres sobre la duración del plan)?
 
-## Estructura
+## Hallazgos principales
+
+| Tema | Resultado |
+| :--- | :--- |
+| Magnitud del atraso | El titulado típico egresa con 2 semestres de atraso (mediana); la media es 3,40 semestres, IC 95 % [3,37; 3,43]. |
+| Brecha por sexo | Los hombres se atrasan 1,07 semestres más que las mujeres (Welch, p < 0,001; d = 0,23). La brecha es robusta en el signo, pero cerca de la mitad se explica por el área de conocimiento: dentro de áreas se reduce a 0,55 semestres. |
+| Heterogeneidad institucional | El error estándar jackknife por institución (0,111) es 3,5 veces el de Welch; en el modelo logístico, el bootstrap por universidad ensancha los intervalos entre 1,8 y 9,2 veces respecto de Wald. La incertidumbre entre instituciones domina sobre la del muestreo. |
+| Potencia | Según simulación Monte Carlo (binomial negativa), la brecha por sexo solo es detectable con potencia de 80 % en cohortes de unos 700 titulados o más. |
+| Datos faltantes | El 12,75 % de los registros no informa el año de ingreso original. El mecanismo es MAR, ligado a la jornada: 75,9 % de faltantes en A Distancia frente a 1,5 % en Diurna (razón 50:1). |
+| Imputación simple | Imputar por la mediana invierte el signo de tres jornadas y de un área, e infla la tasa de atraso alto de 24,5 % a 32,7 %. Se descarta. |
+| Modelo predictivo | El modelo logístico seleccionado (sexo, área, jornada y edad de ingreso; mínimo AIC y BIC) alcanza AUC = 0,662 y exactitud de 65,3 % en un conjunto de prueba común de casos observados (umbral de Youden 0,2246). Derecho (OR = 4,42), Agropecuaria (2,42) e Ingeniería (2,14) elevan el riesgo; ser mujer lo reduce (OR = 0,75). |
+| Impacto de la imputación | La imputación por regresión distorsiona los odds ratios de jornada al omitir esa covariable. La imputación múltiple congeniada (m = 20, reglas de Rubin) reduce la discrepancia media con casos completos de 18,5 % a 7,3 % y calibra las probabilidades predichas. |
+
+## Competencias y métodos
+
+| Área | Métodos y herramientas |
+| :--- | :--- |
+| Preparación de datos | Filtrado del universo de análisis, códigos centinela a nulos, variables derivadas, detección de atípicos (Tukey) sin eliminación apresurada, modularización en `src/`. |
+| Estadística inferencial | Intervalos *t*, prueba *t* de Welch, chi-cuadrado, tamaños de efecto (*d* de Cohen, V de Cramér), correlación de Spearman. |
+| Estadística computacional | Bootstrap percentil y BCa (B = 10.000), pruebas de permutación, jackknife por clúster institucional, simulación Monte Carlo de potencia y convergencia. |
+| Datos faltantes | Diagnóstico MCAR/MAR, eliminación por lista, imputación simple, imputación por regresión, imputación múltiple con reglas de Rubin, experimento controlado contra *ground truth*. |
+| Modelamiento predictivo | Regresión logística, selección por AIC/BIC y stepwise, odds ratios con bootstrap por clúster, curva ROC, umbral de Youden, Brier score, prevención de fuga de datos. |
+| Reproducibilidad y comunicación | Python (pandas, NumPy, SciPy, statsmodels, scikit-learn, matplotlib, seaborn), semilla fija 42, entorno virtual con versiones fijadas, informes en LaTeX, Git y GitHub con trabajo colaborativo por ramas y *pull requests*. |
+
+## Recorrido del proyecto
+
+| Fase | Foco | Notebook | Informe |
+| :--- | :--- | :--- | :--- |
+| Fase 1 | Ficha descriptiva: problema, variables y relaciones preliminares | — | [Ficha](docs/Ficha_Descriptiva.md) · [PDF](S1/informe/Entrega_Formativa1_Fase1_grupo_6.pdf) |
+| Fase 2 | Calidad de datos, análisis exploratorio, estimación y pruebas de hipótesis | [Sumativa1_F2_Titulados](S1/notebooks/Sumativa1_F2_Titulados.ipynb) | [PDF](S1/informe/Informe_Sumativa1_F2.pdf) |
+| Fase 3 | Validación computacional: bootstrap, permutación, Monte Carlo y robustez | [Sumativa2_F3_Titulados](S2/notebooks/Sumativa2_F3_Titulados.ipynb) | [PDF](S2/informe/Informe_Sumativa2_F3.pdf) |
+| Práctica guiada | Flujo de modelamiento supervisado y experimento controlado de imputación | [Formativa2_Informe4](S3/notebooks/Formativa2_Informe4_Titulados_Grupo6.ipynb) | [PDF](S3/notebooks/Formativa2_Informe4_Titulados_Grupo6.pdf) |
+| Fase 4 | Imputación, regresión logística e impacto de la imputación en el modelo | [S3_01](S3/notebooks/S3_01_Preparacion_Datos.ipynb) · [S3_02](S3/notebooks/S3_02_Regresion_Logistica.ipynb) · [S3_03](S3/notebooks/S3_03_Impacto_Imputacion.ipynb) | [PDF](S3/informe/Informe_Sumativa3_F4.pdf) |
+
+Los resultados intermedios que conectan cada fase con la siguiente están versionados en `S2/resultados/` y `S3/resultados/`.
+
+## Datos
+
+Base oficial de **Titulados en Educación Superior 2025**, Servicio de Información de Educación Superior (SIES), Mineduc.
+
+1. Descargar el conjunto *Educación Superior - Titulados en Educación Superior 2025* desde [datosabiertos.mineduc.cl](https://datosabiertos.mineduc.cl).
+2. Guardar el archivo `20260817_Titulados_Ed_Superior_2025_WEB.csv` (separador punto y coma) en `data/raw/`.
+3. Los notebooks aplican el filtro a pregrado universitario (`nivel_global == 'Pregrado'` y `tipo_inst_1 == 'Universidades'`), con lo que se obtienen los 105.063 registros analizados.
+
+El archivo crudo no se versiona por su tamaño.
+
+## Estructura del repositorio
+
 ```
-data/raw/                 archivo crudo (no versionado), compartido por S1 y S2
-S1/notebooks/             Sumativa1_F2_Titulados.ipynb (Sumativa 1, Fase 2)
-S1/informe/               Informe_Sumativa1_F2.pdf y figuras/
-S2/notebooks/             notebook de la Sumativa 2, Fase 3
-S2/informe/               informe de la Sumativa 2 y figuras/
-S2/resultados/            resultados validados (insumo para la Sumativa 3)
-requirements.txt          librerías y versiones
+data/raw/              archivo crudo del Mineduc (no versionado)
+docs/                  ficha descriptiva del problema
+S1/notebooks/          análisis exploratorio e inferencia
+S1/informe/            informes de las fases 1 y 2, y figuras
+S2/notebooks/          validación computacional
+S2/informe/            informe de la fase 3 y figuras
+S2/resultados/         resultados validados (insumo de la fase 4)
+S3/src/                funciones de preparación reutilizables
+S3/notebooks/          preparación, regresión logística e impacto de la imputación
+S3/informe/            informe final integrado, secciones y presentación
+S3/resultados/         métricas, odds ratios y comparaciones en CSV
+requirements.txt       dependencias con versiones fijadas
 ```
+
 ## Cómo reproducir
+
 ```
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 ```
-Luego abrir `S1/notebooks/Sumativa1_F2_Titulados.ipynb` (o el notebook de `S2/notebooks/`) y ejecutar todas las celdas en orden. Los procedimientos aleatorios usan semilla 42.
 
-## Contenido del análisis
-1. Preparación y calidad de datos: filtro, faltantes, variables derivadas (`semestres_reales`, `atraso_semestres`, `edad_titulacion`), atípicos marcados sin eliminar.
-2. Análisis exploratorio: descriptivos, frecuencias, correlaciones de Spearman y comparación por grupos.
-3. Estimación: IC 95 % *t* para la media y bootstrap para la mediana.
-4. Pruebas de hipótesis: *t* de Welch (atraso por sexo) y chi-cuadrado (jornada × atraso alto), con tamaño de efecto.
+Con el archivo crudo en `data/raw/`, ejecutar los notebooks en el orden de la tabla anterior. En la fase 4, `S3_01_Preparacion_Datos.ipynb` genera los conjuntos imputados (formato parquet, no versionados) que usan los notebooks siguientes. Todos los procedimientos aleatorios usan semilla 42.
 
-## Resultados principales
-- El titulado típico egresa con **2 semestres de atraso** (media 3,40; IC 95 % [3,37; 3,43]).
-- Los hombres se atrasan **1,07 semestres más** que las mujeres (*p* < 0,001; *d* = 0,23, efecto pequeño).
-- La jornada vespertina tiene **9 puntos porcentuales más** de atraso alto que la diurna (*p* < 0,001; V de Cramér = 0,06).
+## Autoría y créditos
 
-## Sumativa 2: validación computacional (carpeta `S2/`)
-Notebook `S2/notebooks/Sumativa2_F3_Titulados.ipynb` e informe `S2/informe/Informe_Sumativa2_F3.pdf`. Semilla 42, B = R = 10.000.
-1. Bootstrap (percentil y BCa) de 3 intervalos de confianza.
-2. Pruebas de permutación de las dos pruebas de la S1.
-3. Estabilidad bootstrap de 4 correlaciones de Spearman.
-4. Simulación Monte Carlo (binomial negativa con parámetros de la S1): potencia según tamaño de cohorte y convergencia.
-5. Robustez: atípicos, medias recortadas, jackknife por institución, umbrales, distribuciones y efecto del área.
-6. Resultados validados para la S3 en `S2/resultados/` (`resultados_validados.csv` y `.md`).
+Repositorio creado y mantenido por **Jorge Álvarez Ossandón**, responsable del diseño metodológico, la implementación de los notebooks y la integración de resultados.
 
-**Hallazgos:** los IC y las pruebas de la S1 se validan. La brecha por sexo es robusta en el signo pero no en la magnitud: la mitad se explica por el área de conocimiento (0,55 semestres dentro de áreas), y el EE por institución es 3,5 veces el de Welch. En cohortes de menos de ~700 titulados la brecha no es detectable.
+El proyecto se desarrolló como trabajo del Grupo 6 del curso MCDI501, junto a Fernanda Ovalle Román, Sebastián Cajales Cid y César Lorca Bacián, bajo la docencia de Jean Paul Maidana González.
